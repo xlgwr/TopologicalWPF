@@ -50,6 +50,14 @@ namespace TopologicalWPF
         #endregion
 
         #region 点位置保存
+        /// <summary>
+        /// 路径
+        /// </summary>
+        public string configDirectory { get; set; } = "TopologicalConfig";
+        /// <summary>
+        /// 目录
+        /// </summary>
+        public string projectFilePath { get; set; }
 
         #endregion
         public MainWindow()
@@ -64,7 +72,135 @@ namespace TopologicalWPF
             this.Content = canvas;
 
             ToDo(canvas);
+
+            toDoAddMenu();
+
+            saveDefault();
         }
+
+
+        #region 布局功能
+
+        private void toDoAddMenu()
+        {
+            projectFilePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, configDirectory);
+            projectFilePath.FileDirectoryCreateDirectory();
+
+            var menu = new ContextMenu();
+
+            var menu1 = new MenuItem() { Header = "使用默认布局" };
+            menu1.Click += Menu1_Click;
+
+            var menu2 = new MenuItem() { Header = "使用自定义布局" };
+            menu2.Click += Menu1_Click2;
+
+            var menu3 = new MenuItem() { Header = "保存自定义布局" };
+            menu3.Click += Menu1_Click3;
+
+            menu.Items.Add(menu1);
+            menu.Items.Add(menu2);
+            menu.Items.Add(menu3);
+
+            this.ContextMenu = menu;
+        }
+        private void saveDefault()
+        {
+            try
+            {
+                var toJson = networkNodeShapesList.ToDictionary(a => a.Key, a => a.PointNow).toJsonStr();
+                var tmpPath = System.IO.Path.Combine(projectFilePath, $"{configDirectory}Default.json");
+                tmpPath.FilePathSaveContent(toJson, Encoding.UTF8);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+        }
+        private void Menu1_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var tmpPath = System.IO.Path.Combine(projectFilePath, $"{configDirectory}Default.json");
+                loadProjectByFilePath(tmpPath);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+        private void Menu1_Click2(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+
+                Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog();
+                openFileDialog.Filter = "json选择布局 (*.json)|*.json";
+                openFileDialog.Title = "选择布局";
+                openFileDialog.InitialDirectory = projectFilePath;
+                if ((bool)openFileDialog.ShowDialog())
+                {
+                    string tmpPath = openFileDialog.FileName;
+                    loadProjectByFilePath(tmpPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void loadProjectByFilePath(string tmpPath)
+        {
+            var getContent = tmpPath.FilePathGetContent(Encoding.UTF8);
+            if (getContent.IsNullOrWhiteSpace())
+            {
+                return;
+            }
+            var getlistCheckList = getContent.JsonTo<Dictionary<string, Point>>();
+            foreach (var item in networkNodeShapesList)
+            {
+                if (getlistCheckList.ContainsKey(item.Key))
+                {
+                    item.PointNow = getlistCheckList[item.Key];
+                }
+                //刷新位置
+                NetworkNodeShapePlaceChangeEnd(item, true);
+            }
+        }
+
+        private void Menu1_Click3(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var toJson = networkNodeShapesList.ToDictionary(a => a.Key, a => a.PointNow).toJsonStr();
+
+                Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog();
+                saveFileDialog.Filter = "json布局文件 (*.json)|*.json";
+                saveFileDialog.Title = "保存当前选择布局";
+                saveFileDialog.InitialDirectory = projectFilePath;
+                var saveName = projectFilePath.Replace(@"\", "`").Replace(@":", "`").Replace(@"``", "`").Split('`');
+
+                var saveNameLast = saveName[saveName.Length - 1];
+                if (saveName.Length > 2)
+                {
+                    saveNameLast = saveName[0] + "_m_" + saveName[saveName.Length - 2] + "_" + saveName[saveName.Length - 1];
+                }
+                saveFileDialog.FileName = $"布局_{saveNameLast}_" + DateTime.Now.Date.ToString("yyyyMMdd");
+                if ((bool)(saveFileDialog.ShowDialog()))
+                {
+                    //获得文件路径
+                    var localFilePath = saveFileDialog.FileName.ToString();
+                    localFilePath.FilePathSaveContent(toJson, Encoding.UTF8);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+        #endregion
+
         private void MainWindow_MouseWheel(object sender, MouseWheelEventArgs e)
         {
 
@@ -215,6 +351,7 @@ namespace TopologicalWPF
             networkNodeShape.rShowNode.Fill = new SolidColorBrush(Colors.Red);
             networkNodeShape.txtDesc.Text = toShowDesc;
             networkNodeShape.txtName.Text = toShowName;
+            networkNodeShape.PointNow = pointText;
 
             canvas.Children.Add(networkNodeShape);
             canvas.SetLeftTop(networkNodeShape, pointText);
@@ -393,19 +530,31 @@ namespace TopologicalWPF
                 ele.ReleaseMouseCapture();
                 if (ele is NetworkNodeShape)
                 {
+                    Canvas canvas = (Canvas)this.Content;
                     var currnetwork = (NetworkNodeShape)ele;
-                    currnetwork.PointNow = new Point(pos.X, pos.Y);
+                    currnetwork.PointNow = currnetwork.TranslatePoint(new Point(), canvas);
                     NetworkNodeShapePlaceChangeEnd(currnetwork);
                 }
             }
         }
-        public void NetworkNodeShapePlaceChangeEnd(NetworkNodeShape networkNode)
+        /// <summary>
+        /// 刷新线及点
+        /// </summary>
+        /// <param name="networkNode"></param>
+        public void NetworkNodeShapePlaceChangeEnd(NetworkNodeShape networkNode, bool isRefPlace = false)
         {
             try
             {
-
                 Canvas canvas = (Canvas)this.Content;
-                Point pointEnd = new Point(networkNode.PointNow.X - networkNode.Width, networkNode.PointNow.Y - networkNode.Height / 2);
+                Point pointEnd = new Point(networkNode.PointNow.X + networkNode.Width / 2, networkNode.PointNow.Y + networkNode.Height / 2);
+
+                if (isRefPlace)
+                {
+                    Point pointText = new Point(networkNode.PointNow.X - networkNode.Width / 2, networkNode.PointNow.Y - networkNode.Height / 2);
+                    pointEnd = networkNode.PointNow;
+
+                    canvas.SetLeftTop(networkNode, pointText);
+                }
 
                 DrawLineAndArrow(canvas, networkNode, pointEnd, false);
                 DrawLineAndArrow(canvas, networkNode, pointEnd, true);
