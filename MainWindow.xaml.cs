@@ -47,8 +47,11 @@ namespace TopologicalWPF
         /// </summary>
         public Dictionary<string, string> ShowMsgArrows { get; set; } = new Dictionary<string, string>();
 
-        #endregion 
+        #endregion
 
+        #region 点位置保存
+
+        #endregion
         public MainWindow()
         {
             InitializeComponent();
@@ -390,20 +393,22 @@ namespace TopologicalWPF
                 ele.ReleaseMouseCapture();
                 if (ele is NetworkNodeShape)
                 {
-                    NetworkNodeShapePlaceChangeEnd((NetworkNodeShape)ele);
+                    var currnetwork = (NetworkNodeShape)ele;
+                    currnetwork.PointNow = new Point(pos.X, pos.Y);
+                    NetworkNodeShapePlaceChangeEnd(currnetwork);
                 }
             }
         }
-        public void NetworkNodeShapePlaceChangeEnd(NetworkNodeShape networkNodeShape)
+        public void NetworkNodeShapePlaceChangeEnd(NetworkNodeShape networkNode)
         {
             try
             {
 
                 Canvas canvas = (Canvas)this.Content;
-                Point pointEnd = new Point(pos.X - networkNodeShape.Width, pos.Y - networkNodeShape.Height / 2);
+                Point pointEnd = new Point(networkNode.PointNow.X - networkNode.Width, networkNode.PointNow.Y - networkNode.Height / 2);
 
-                DrawLineAndArrow(canvas, networkNodeShape, pointEnd, false);
-                DrawLineAndArrow(canvas, networkNodeShape, pointEnd, true);
+                DrawLineAndArrow(canvas, networkNode, pointEnd, false);
+                DrawLineAndArrow(canvas, networkNode, pointEnd, true);
             }
             catch (Exception ex)
             {
@@ -454,7 +459,7 @@ namespace TopologicalWPF
                 var currArrow = canvas.DrawTextArrow(point1, point2, showmsg);
 
                 LinePointsTmp[item.Key] = new Tuple<Point, Point>(point1, point2);
-                LinesTmp[item.Key] = new List<UIElement>() { currLine, currArrow }; 
+                LinesTmp[item.Key] = new List<UIElement>() { currLine, currArrow };
             }
 
             foreach (var item in LinesTmp)

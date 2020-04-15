@@ -21,6 +21,7 @@ namespace TopologicalWPF.Shapes
     public partial class NetworkNodeShape : UserControl
     {
         public string Key { get; set; }
+        public Point PointNow { get; set; }
 
         #region 发出的线
         /// <summary>
