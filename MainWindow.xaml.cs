@@ -50,6 +50,8 @@ namespace TopologicalWPF
         #endregion
 
         #region 点位置保存
+        bool isDragDropInEffect = false;
+        Point pos = new Point();
         /// <summary>
         /// 路径
         /// </summary>
@@ -83,25 +85,34 @@ namespace TopologicalWPF
 
         private void toDoAddMenu()
         {
-            projectFilePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, configDirectory);
-            projectFilePath.FileDirectoryCreateDirectory();
+            try
+            {
+                projectFilePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, configDirectory);
+                projectFilePath.FileDirectoryCreateDirectory();
 
-            var menu = new ContextMenu();
+                var menu = new ContextMenu();
 
-            var menu1 = new MenuItem() { Header = "使用默认布局" };
-            menu1.Click += Menu1_Click;
+                var menu1 = new MenuItem() { Header = "使用默认布局" };
+                menu1.Click += Menu1_Click;
 
-            var menu2 = new MenuItem() { Header = "使用自定义布局" };
-            menu2.Click += Menu1_Click2;
+                var menu2 = new MenuItem() { Header = "使用自定义布局" };
+                menu2.Click += Menu1_Click2;
 
-            var menu3 = new MenuItem() { Header = "保存自定义布局" };
-            menu3.Click += Menu1_Click3;
+                var menu3 = new MenuItem() { Header = "保存自定义布局" };
+                menu3.Click += Menu1_Click3;
 
-            menu.Items.Add(menu1);
-            menu.Items.Add(menu2);
-            menu.Items.Add(menu3);
+                menu.Items.Add(menu1);
+                menu.Items.Add(menu2);
+                menu.Items.Add(menu3);
 
-            this.ContextMenu = menu;
+                this.ContextMenu = menu;
+
+            }
+            catch (Exception ex)
+            {
+
+                MessageBox.Show(ex.Message);
+            }
         }
         private void saveDefault()
         {
@@ -519,8 +530,7 @@ namespace TopologicalWPF
                 uiEle.MouseLeftButtonUp += new MouseButtonEventHandler(Element_MouseLeftButtonUp);
             }
         }
-        bool isDragDropInEffect = false;
-        Point pos = new Point();
+       
         private void Element_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (isDragDropInEffect)
@@ -626,11 +636,11 @@ namespace TopologicalWPF
             if (isDragDropInEffect)
             {
                 FrameworkElement currEle = sender as FrameworkElement;
-                double xPos = e.GetPosition(null).X - pos.X + (double)currEle.GetValue(Canvas.LeftProperty);
-                double yPos = e.GetPosition(null).Y - pos.Y + (double)currEle.GetValue(Canvas.TopProperty);
+                double xPos = e.GetPosition(this).X - pos.X + (double)currEle.GetValue(Canvas.LeftProperty);
+                double yPos = e.GetPosition(this).Y - pos.Y + (double)currEle.GetValue(Canvas.TopProperty);
                 currEle.SetValue(Canvas.LeftProperty, xPos);
                 currEle.SetValue(Canvas.TopProperty, yPos);
-                pos = e.GetPosition(null);
+                pos = e.GetPosition(this);
             }
         }
 
@@ -638,7 +648,7 @@ namespace TopologicalWPF
         {
             FrameworkElement fEle = sender as FrameworkElement;
             isDragDropInEffect = true;
-            pos = e.GetPosition(null);
+            pos = e.GetPosition(this);
             fEle.CaptureMouse();
             fEle.Cursor = Cursors.Hand;
         }

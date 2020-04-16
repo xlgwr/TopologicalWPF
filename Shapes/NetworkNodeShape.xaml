@@ -7,7 +7,7 @@
              mc:Ignorable="d" Height="55" Width="100">
     <Grid>
         <Rectangle x:Name="rShowNode" Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="55" Margin="0" Stroke="Black" VerticalAlignment="Top" Width="100"/>
-        <TextBlock x:Name="txtName" TextAlignment="Center" HorizontalAlignment="Left" Margin="0,7,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="20" Width="100"/>
-        <TextBlock x:Name="txtDesc" TextAlignment="Center" HorizontalAlignment="Left"  Margin="0,28,0,7" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Center"  Width="100" Height="20"/>
+        <TextBlock x:Name="txtName" TextAlignment="Center" HorizontalAlignment="Left" Margin="0,7,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="20" Width="100" FontWeight="Bold" FontSize="14" Foreground="White"/>
+        <TextBlock x:Name="txtDesc" TextAlignment="Center" HorizontalAlignment="Left"  Margin="0,28,0,7" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Center"  Width="100" Height="20" Foreground="White"/>
     </Grid>
 </UserControl>
