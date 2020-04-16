@@ -224,6 +224,14 @@ namespace TopologicalWPF
         {
             try
             {
+                Canvas canvas = (Canvas)this.Content;
+
+                networkNodeShapesList.ForEach((n) =>
+                {
+                    n.PointNow = n.TranslatePoint(new Point(), canvas);
+
+                });
+
                 var toJson = networkNodeShapesList.ToDictionary(a => a.Key, a => a.PointNow).toJsonStr();
 
                 Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog();
