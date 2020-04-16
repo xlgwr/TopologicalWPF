@@ -67,10 +67,13 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="CanvasExts.cs" />
+    <Compile Include="common\FileGetHelper.cs" />
     <Compile Include="entity\ClientType.cs" />
     <Compile Include="entity\LinkInfo.cs" />
     <Compile Include="entity\NodeInfo.cs" />
     <Compile Include="entity\NodesResponse.cs" />
+    <Compile Include="Extensiones\System\Collections\GenericExt.cs" />
+    <Compile Include="Extensiones\System\StringExt.cs" />
     <Compile Include="Shapes\NetworkNodeShape.xaml.cs">
       <DependentUpon>NetworkNodeShape.xaml</DependentUpon>
     </Compile>

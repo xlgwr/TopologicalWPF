@@ -17,3 +17,4 @@ E:\0xlg\0base\wpf\TopologicalWPF\obj\Debug\TopologicalWPF.pdb
 E:\0xlg\0base\wpf\TopologicalWPF\obj\Debug\TopologicalWPF.csproj.CoreCompileInputs.cache
 E:\0xlg\0base\wpf\TopologicalWPF\obj\Debug\Shapes\NetworkNodeShape.g.cs
 E:\0xlg\0base\wpf\TopologicalWPF\obj\Debug\Shapes\NetworkNodeShape.baml
+E:\0xlg\0base\wpf\TopologicalWPF\obj\Debug\TopologicalWPF.csprojAssemblyReference.cache

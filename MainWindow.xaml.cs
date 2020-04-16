@@ -15,6 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ManageServerClient.Shared.Common;
 using TopologicalWPF.Shapes;
+using TopologicalWPF.common;
 
 namespace TopologicalWPF
 {
@@ -105,12 +106,51 @@ namespace TopologicalWPF
                 menu.Items.Add(menu2);
                 menu.Items.Add(menu3);
 
+                Separator separator = new Separator();
+
+                menu.Items.Add(separator);
+
+                loadProjectByFileMenu(menu);
+
                 this.ContextMenu = menu;
 
             }
             catch (Exception ex)
             {
 
+                MessageBox.Show(ex.Message);
+            }
+        }
+        private void loadProjectByFileMenu(ContextMenu context)
+        {
+            var toNotnames = new List<string>() { "TopologicalConfigDefault" };
+            string getFileName = ".json";
+            FileGetHelper.maxFileSize = 10;
+            FileGetHelper.allGetFiles.Clear();
+            FileGetHelper.getFile(projectFilePath, getFileName, toNotnames);
+            var getAllSearchFile = FileGetHelper.allGetFiles;
+
+            foreach (var item in getAllSearchFile)
+            {
+                var menuTmp = new MenuItem() { Header = item.Name.Replace(".json", ""), ToolTip = item.FullName };
+                menuTmp.Click += Menu1_Click_Load;
+
+                context.Items.Add(menuTmp);
+            }
+        }
+        private void Menu1_Click_Load(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (sender is MenuItem)
+                {
+                    var tmpPath = ((MenuItem)sender).ToolTip.ToString();
+                    loadProjectByFilePath(tmpPath);
+                }
+
+            }
+            catch (Exception ex)
+            {
                 MessageBox.Show(ex.Message);
             }
         }
