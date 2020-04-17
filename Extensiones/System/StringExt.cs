@@ -6,7 +6,7 @@ using System.Text;
 
 namespace System
 {
-    public static class StringExt
+    public static partial class StringExt
     {
         /// <summary>
         /// 目录新增
@@ -45,6 +45,22 @@ namespace System
             catch (Exception ex)
             {
                 return false;
+            }
+        }
+        /// <summary>
+        /// 获取路径文件名，不包扩展名
+        /// </summary>
+        /// <param name="m"></param>
+        /// <returns></returns>
+        public static string GetFileNameWithoutExtension(this string m)
+        {
+            try
+            {
+                return System.IO.Path.GetFileNameWithoutExtension(m);
+            }
+            catch (Exception ex)
+            {
+                return m;
             }
         }
     }

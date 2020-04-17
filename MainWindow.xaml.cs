@@ -53,6 +53,7 @@ namespace TopologicalWPF
         #region 点位置保存
         bool isDragDropInEffect = false;
         Point pos = new Point();
+        private ContextMenu menuTemp;
         /// <summary>
         /// 路径
         /// </summary>
@@ -61,6 +62,7 @@ namespace TopologicalWPF
         /// 目录
         /// </summary>
         public string projectFilePath { get; set; }
+        public List<string> strListMenuFilePath { get; set; } = new List<string>();
 
         #endregion
         public MainWindow()
@@ -91,7 +93,7 @@ namespace TopologicalWPF
                 projectFilePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, configDirectory);
                 projectFilePath.FileDirectoryCreateDirectory();
 
-                var menu = new ContextMenu();
+                menuTemp = new ContextMenu();
 
                 var menu1 = new MenuItem() { Header = "使用默认布局" };
                 menu1.Click += Menu1_Click;
@@ -102,17 +104,17 @@ namespace TopologicalWPF
                 var menu3 = new MenuItem() { Header = "保存自定义布局" };
                 menu3.Click += Menu1_Click3;
 
-                menu.Items.Add(menu1);
-                menu.Items.Add(menu2);
-                menu.Items.Add(menu3);
+                menuTemp.Items.Add(menu1);
+                menuTemp.Items.Add(menu2);
+                menuTemp.Items.Add(menu3);
 
                 Separator separator = new Separator();
 
-                menu.Items.Add(separator);
+                menuTemp.Items.Add(separator);
 
-                loadProjectByFileMenu(menu);
+                loadProjectByFileMenu(menuTemp);
 
-                this.ContextMenu = menu;
+                this.ContextMenu = menuTemp;
 
             }
             catch (Exception ex)
@@ -130,11 +132,19 @@ namespace TopologicalWPF
             FileGetHelper.getFile(projectFilePath, getFileName, toNotnames);
             var getAllSearchFile = FileGetHelper.allGetFiles;
 
+            strListMenuFilePath.Clear();
             foreach (var item in getAllSearchFile)
             {
-                var menuTmp = new MenuItem() { Header = item.Name.Replace(".json", ""), ToolTip = item.FullName };
+                AddMenu(context, item.FullName.GetFileNameWithoutExtension(), item.FullName);
+            }
+        }
+        public void AddMenu(ContextMenu context, string header, string path)
+        {
+            if (!strListMenuFilePath.Contains(path))
+            {
+                strListMenuFilePath.Add(path);
+                var menuTmp = new MenuItem() { Header = header, ToolTip = path };
                 menuTmp.Click += Menu1_Click_Load;
-
                 context.Items.Add(menuTmp);
             }
         }
@@ -184,16 +194,11 @@ namespace TopologicalWPF
         {
             try
             {
-
-                Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog();
-                openFileDialog.Filter = "json选择布局 (*.json)|*.json";
-                openFileDialog.Title = "选择布局";
-                openFileDialog.InitialDirectory = projectFilePath;
-                if ((bool)openFileDialog.ShowDialog())
+                projectFilePath.OpenFileDialog(new Action<string>((m) =>
                 {
-                    string tmpPath = openFileDialog.FileName;
-                    loadProjectByFilePath(tmpPath);
-                }
+                    loadProjectByFilePath(m);
+                }), "布局", "json选择布局 (*.json)|*.json");
+
             }
             catch (Exception ex)
             {
@@ -234,24 +239,12 @@ namespace TopologicalWPF
 
                 var toJson = networkNodeShapesList.ToDictionary(a => a.Key, a => a.PointNow).toJsonStr();
 
-                Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog();
-                saveFileDialog.Filter = "json布局文件 (*.json)|*.json";
-                saveFileDialog.Title = "保存当前选择布局";
-                saveFileDialog.InitialDirectory = projectFilePath;
-                var saveName = projectFilePath.Replace(@"\", "`").Replace(@":", "`").Replace(@"``", "`").Split('`');
+                toJson.SaveFileDialog(projectFilePath, new Action<string>((m) =>
+                {
+                    AddMenu(menuTemp, m.GetFileNameWithoutExtension(), m);
+                }), "自定义布局", "json 布局文件 (*.json)|*.json");
 
-                var saveNameLast = saveName[saveName.Length - 1];
-                if (saveName.Length > 2)
-                {
-                    saveNameLast = saveName[0] + "_m_" + saveName[saveName.Length - 2] + "_" + saveName[saveName.Length - 1];
-                }
-                saveFileDialog.FileName = $"布局_{saveNameLast}_" + DateTime.Now.Date.ToString("yyyyMMdd");
-                if ((bool)(saveFileDialog.ShowDialog()))
-                {
-                    //获得文件路径
-                    var localFilePath = saveFileDialog.FileName.ToString();
-                    localFilePath.FilePathSaveContent(toJson, Encoding.UTF8);
-                }
+
             }
             catch (Exception ex)
             {
@@ -578,7 +571,7 @@ namespace TopologicalWPF
                 uiEle.MouseLeftButtonUp += new MouseButtonEventHandler(Element_MouseLeftButtonUp);
             }
         }
-       
+
         private void Element_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (isDragDropInEffect)

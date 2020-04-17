@@ -74,6 +74,7 @@
     <Compile Include="entity\NodesResponse.cs" />
     <Compile Include="Extensiones\System\Collections\GenericExt.cs" />
     <Compile Include="Extensiones\System\StringExt.cs" />
+    <Compile Include="Extensiones\Windows\StringExt.cs" />
     <Compile Include="Shapes\NetworkNodeShape.xaml.cs">
       <DependentUpon>NetworkNodeShape.xaml</DependentUpon>
     </Compile>
