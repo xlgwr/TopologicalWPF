@@ -234,6 +234,8 @@ namespace TopologicalWPF
                 networkNodeShapesList.ForEach((n) =>
                 {
                     n.PointNow = n.TranslatePoint(new Point(), canvas);
+                    Point pointEnd = new Point(n.PointNow.X + n.Width / 2, n.PointNow.Y + n.Height / 2);
+                    n.PointNow = pointEnd;
 
                 });
 
